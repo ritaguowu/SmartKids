@@ -7,4 +7,6 @@ from application.models import User
 def signup():
     return User().signup()
 
-
+@app.route("/login", methods=['POST'])
+def login():
+    return User().login()

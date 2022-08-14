@@ -27,3 +27,16 @@ class User:
         db.users.insert_one(user)
         return jsonify(user), 200
 
+    def login(self):
+        user = db.users.find_one({
+            "email": request.json['email']
+        })
+        if user:
+            if pbkdf2_sha256.verify(request.json['password'], user['password']):
+                return jsonify({"success":"Login successfully" }), 200
+            else:
+                return jsonify({"error":"Password is not correct" }), 401
+        else:
+            return jsonify({"error":"Invalid login email" }), 401
+
+    
