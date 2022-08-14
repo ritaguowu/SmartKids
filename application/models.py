@@ -1,7 +1,12 @@
+from application import app
 from application import db
 import uuid
 from flask import Flask, jsonify, request
 from passlib.hash import pbkdf2_sha256
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token
+
+app.config['JWT_SECRET_KEY'] = '5ad5a0c7ba484ecd968ebe435b26a298'
+jwt = JWTManager(app)
 
 #Models
 class User:
@@ -33,7 +38,8 @@ class User:
         })
         if user:
             if pbkdf2_sha256.verify(request.json['password'], user['password']):
-                return jsonify({"success":"Login successfully" }), 200
+                access_token = create_access_token(identity=user['email'])
+                return jsonify({"success":"Login successfully", 'access_token': access_token }), 200
             else:
                 return jsonify({"error":"Password is not correct" }), 401
         else:
