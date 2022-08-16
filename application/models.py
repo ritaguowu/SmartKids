@@ -1,15 +1,15 @@
-from application import app
-from application import db
 import uuid
 from flask import Flask, jsonify, request
 from passlib.hash import pbkdf2_sha256
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token
+import pymongo
 
-app.config['JWT_SECRET_KEY'] = '5ad5a0c7ba484ecd968ebe435b26a298'
-jwt = JWTManager(app)
+#Database
+client = pymongo.MongoClient('localhost', 27017)
+db = client.SmartKids
 
 #Models
-class User:
+class Parent:
     def signup(self):
         print(request)
 
@@ -20,7 +20,8 @@ class User:
             "email": request.json['email'],
             "password": request.json['password'],
             "image": request.json['image'],
-            "parentId": request.json['parentId'],
+            "parentId": "",
+            # "parentId": request.json['parentId'],
         }
 
         # Encrypt the password
@@ -32,7 +33,22 @@ class User:
         db.users.insert_one(user)
         return jsonify(user), 200
 
-    def login(self):
+    def signupKid(self, parentId):
+        print(request)
+
+        #Create the user object
+        user = {
+            "_id": uuid.uuid4().hex,
+            "user_name": request.json['user_name'],
+            "image": request.json['image'],
+            "parentId": parentId,
+        }
+
+        db.users.insert_one(user)
+        return jsonify(user), 200
+    
+
+    def getToken(self):
         user = db.users.find_one({
             "email": request.json['email']
         })
@@ -43,6 +59,10 @@ class User:
             else:
                 return jsonify({"error":"Password is not correct" }), 401
         else:
-            return jsonify({"error":"Invalid login email" }), 401
+            return jsonify({"error":"Invalid login email" }), 402
 
-    
+
+class Child(Parent):
+    def getKidsByParentId(self, parentId):
+        users = db.users.find({"parentId":parentId})
+        return jsonify([user for user in users])
