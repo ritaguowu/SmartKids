@@ -9,5 +9,3 @@ def signup():
 @app.route("/login", methods=['POST'])
 def login():
     return Parent().login()
-
-# @bp.route("/kid", methods)
