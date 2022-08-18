@@ -41,7 +41,7 @@ class Parent:
         if user:
             if pbkdf2_sha256.verify(request.json['password'], user['password']):
                 access_token = create_access_token(identity=user['email'])
-                return jsonify({"success":"Login successfully", 'access_token': access_token, 'user': user }), 200
+                return jsonify({"success":"Login successfully", 'access_token': access_token}), 200
             else:
                 return jsonify({"error":"Password is not correct" }), 401
         else:
