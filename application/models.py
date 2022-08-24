@@ -22,6 +22,7 @@ class Parent:
             "image": request.json['image'],
             "parentId": "",
             # "parentId": request.json['parentId'],
+            "access_token": ""
         }
 
         # Encrypt the password
@@ -40,8 +41,8 @@ class Parent:
         })
         if user:
             if pbkdf2_sha256.verify(request.json['password'], user['password']):
-                access_token = create_access_token(identity=user['email'])
-                return jsonify({"success":"Login successfully", 'access_token': access_token}), 200
+                user["access_token"] = create_access_token(identity=user['email'])
+                return jsonify({"success":"Login successfully", "user": user}), 200
             else:
                 return jsonify({"error":"Password is not correct" }), 401
         else:

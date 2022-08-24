@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from application.models import Parent, Child
+from flask_jwt_extended import jwt_required
 
 api = Blueprint('api', __name__, url_prefix='/api/v1')
 
@@ -13,6 +14,7 @@ def auth():
     return Parent().getToken()
 
 @api.route("/kid",  methods=['POST'])
+@jwt_required()
 def addKid():
     parentId = request.args.get('parentId')
     if parentId is None:
@@ -21,6 +23,7 @@ def addKid():
         return Child().signupKid(parentId)
 
 @api.route("/kids",  methods=['GET'])
+@jwt_required()
 def getKids():
     parentId = request.args.get('parentId')
     if parentId is None:
