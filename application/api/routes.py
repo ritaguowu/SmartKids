@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from application.models import Parent, Child, Point
+from application.models import Parent, Child
 from flask_jwt_extended import jwt_required
 
 
@@ -40,18 +40,6 @@ def getKids():
     else:
         return Child().getKidsByParentId(parentId)
 
-# Add kid for the parent
-@api.route("/kid",  methods=['POST'])
-@jwt_required()
-def addKid():
-    kid_name = request.args.get('kidName')
-    parentId = request.args.get('parentId')
-    token = request.headers["Authorization"].split(" ")[1]
-    if parentId is None:
-        return jsonify({"error":"Please provide the parentId" }), 403
-    else:
-        return Child().createKid(kid_name, parentId, token)
-
 #Update the parent information
 @api.route('/parent', methods=['PUT'])
 @jwt_required()
@@ -64,29 +52,33 @@ def updateParent():
         return Parent().updateParent(email)
 
 
+# Add kid for the parent
+@api.route("/kid",  methods=['POST'])
+@jwt_required()
+def addKid():
+    kid_name = request.args.get('kidName')
+    parentId = request.args.get('parentId')
+    token = request.headers["Authorization"].split(" ")[1]
+    if parentId is None:
+        return jsonify({"error":"Please provide the parentId" }), 403
+    else:
+        return Child().createKid(kid_name, parentId, token)
+
+
+# Delete kid for the parent
 @api.route('/kid', methods=['DELETE'])
 @jwt_required()
 def removeKid():
     kidId = request.args.get('kidId')
+    token = request.headers["Authorization"].split(" ")[1]
     # if None in (email, kid_name):
     if kidId is None:
         return jsonify({"error":"Please provide the kid's id" }), 409
     else:
-        return Child().deleteKid(kidId)
+        return Child().deleteKid(kidId, token)
 
 
-@api.route('/point', methods=['PUT'])
-@jwt_required()
-def updatePoint():
-    kidId = request.args.get('kidId')
-    points = request.args.get('points')
-    if kidId is None:
-        return jsonify({"error":"Please provide the kid's id" }), 409
-    else:
-        return Point().updatePoint(kidId, points)
-
-
-
+#Get one kid information for the parent
 @api.route('/kid', methods=['GET'])
 @jwt_required()
 def getKidById():
@@ -94,9 +86,24 @@ def getKidById():
     print(token)
     kidId = request.args.get('kidId')
     if kidId is None:
-        return jsonify({"error":"Please provide the parentId" }), 403
+        return jsonify({"error":"Please provide the kidId" }), 403
     else:
         return Child().getKidById(kidId, token)
+
+
+#Update one kid information
+@api.route('/kid', methods=['PUT'])
+def updateKid():
+    kidId = request.args.get('kidId')
+    token = request.headers["Authorization"].split(" ")[1]
+    print("token:", token)
+    # if None in (email, kid_name):
+    if kidId is None:
+        return jsonify({"error":"Please provide the kid's id" }), 409
+    else:
+        return Child().updateKid(kidId, token)
+
+
 
 
 
@@ -110,12 +117,4 @@ def getKidById():
 #         return Parent().getParentByEmail(email)
 
 
-@api.route('/kid', methods=['PUT'])
-def updateKid():
-    email = request.args.get('email')
-    kid_name = request.args.get('kid_name')
-    if None in (email, kid_name):
-        return jsonify({"error":"Please provide the user email and kid's name" }), 409
-    else:
-        return Child().updateKid(email, kid_name)
 

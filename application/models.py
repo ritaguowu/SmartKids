@@ -1,3 +1,4 @@
+from multiprocessing import parent_process
 import uuid
 from flask import Flask, jsonify, request
 from passlib.hash import pbkdf2_sha256
@@ -76,14 +77,14 @@ class Parent:
     # SignIn
     def signIn(self):
         user = db.users.find_one({
-            "email": request.json['email']
+            "email": request.json['email'].lower()
         })
         if user:
             if pbkdf2_sha256.verify(request.json['password'], user['password']):
                 user["access_token"] = create_access_token(identity=user['email'])
                 filter = {'email': user['email']}
                 db.users.update_one(filter, {"$set": {"access_token":user["access_token"]}})
-                parent = db.users.find_one({"email": request.json['email']})
+                parent = db.users.find_one({"email": user['email']})
                 return jsonify({"success":"Login successfully", "user": parent}), 200
             else:
                 return jsonify({"error":"Password is not correct" }), 401
@@ -148,54 +149,57 @@ class Child(Parent):
             db.users.insert_one(kid)
             return jsonify({"success":"Kid login successfully", "user": kid}), 200
 
+    #Get one kid information for the parent
     def getKidById(self, kidId, token):
         kid = db.users.find_one({"_id":kidId})
-        print(kid)
-        if kid['access_token'] == token:
-            return jsonify({"success":"Success", 'kid': kid }), 200
+        parent = db.users.find_one({"_id": kid['parentId']})
+        print("kid:",kid)
+        print("parent:", parent)
+
+        if kid:
+            if token == parent['access_token']:
+                return jsonify({"success":"Success", 'kid': kid }), 200
+            else:
+                return jsonify({"error":"Invalid token" }), 402
         else:
-            return jsonify({"error":"Invalid login" }), 402
+             return jsonify({"error":"User not found"}), 410
         
     
+    def deleteKid(self, kidId, token):
+        kid = db.users.find_one({"_id":kidId})
+        parent = db.users.find_one({"_id": kid['parentId']})
+
+        if kid:
+            if token == parent['access_token']:
+                db.users.delete_one(kid)
+                return jsonify({"success":"Delete successfully"}), 200
+            else:
+                return jsonify({"error":"Invalid token" }), 402
+        else:
+            return jsonify({"error":"User not found"}), 410
+
 
     # Get kids information for the parent
     def getKidsByParentId(self, parentId):
         users = db.users.find({"parentId":parentId})
         return jsonify({"user":[user for user in users]})
 
-    
-    
-    def deleteKid(self, kidId):
+
+    def updateKid(self, kidId, token):
+        user_name=request.json['user_name']
+        image=request.json['image']
+        points=request.json['points']
+        print("points: ", points)
+
         kid = db.users.find_one({"_id":kidId})
+        parent = db.users.find_one({"_id": kid['parentId']})
+
         if kid:
-            db.users.delete_one(kid)
-            return jsonify({"success":"Delete successfully"}), 200
+            if token == parent['access_token']:
+                 db.users.find_one_and_update({"_id":kidId}, {"$set": {"user_name":user_name, "points": points, "image":image}})
+                 return jsonify({"success":"Update user uccessfully", "kid": kid}), 200
+            else:
+                return jsonify({"error":"Invalid token" }), 402
         else:
             return jsonify({"error":"User not found"}), 410
- 
-
-class Point:
-    def updatePoint(self, kidId, points):
-        kid = db.users.find_one({"_id":kidId})
-        if kid:
-            filter = {"_id":kidId}
-            db.users.update_one(filter, {"$set": {"points":points}})
-        # user = db.users.find_one(myquery)
-        user = db.users.find_one({"_id":kidId})
-        return jsonify({"success":"Update kid point successfully", "user": user}), 200
-
-
-    # def updateKid(self, email, kid_name):
-    #     parent = db.users.find_one({"email":email})
-    #     user_name=request.json['user_name']
-
-    #     print(parent['_id'], kid_name)
-    #     image=request.json['image']
-    #     myquery={"$and":[{"parentId":parent['_id'], "user_name":kid_name}]}
-    #     newvalues={"$set": {"user_name":user_name, "image":image}}
-    #     db.users.find_one_and_update(myquery, newvalues)
-    #     # user = db.users.find_one(myquery)
-    #     user = db.users.find_one({"$or":[{"parentId":parent['_id'], "user_name":user_name}]})
-    #     return jsonify({"success":"Update kid successfully", "user": user}), 200
-
 
