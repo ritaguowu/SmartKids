@@ -62,7 +62,10 @@ def addKid():
     if parentId is None:
         return jsonify({"error":"Please provide the parentId" }), 403
     else:
-        return Child().createKid(kid_name, parentId, token)
+        if kid_name is None:
+           return jsonify({"error":"Please provide the kidName" }), 403 
+        else:
+            return Child().createKid(kid_name, parentId, token)
 
 
 # Delete kid for the parent
@@ -104,17 +107,13 @@ def updateKid():
         return Child().updateKid(kidId, token)
 
 
-
-
-
-
-# @api.route('/parent', methods=['GET'])
-# def getParent():
-#     email = request.args.get('email') 
-#     if email is None:
-#         return jsonify({"error":"Please provide the email" }), 410
-#     else:
-#         return Parent().getParentByEmail(email)
+@api.route('/parentByEmail', methods=['GET'])
+def getParent():
+    email = request.args.get('email') 
+    if email is None:
+        return jsonify({"error":"Please provide the email" }), 410
+    else:
+        return Parent().getParentByEmail(email)
 
 
 

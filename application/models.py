@@ -54,7 +54,7 @@ class Parent:
         user = {
             "_id": uuid.uuid4().hex,
             "user_name": request.json['user_name'],
-            "email": request.json['email'],
+            "email": request.json['email'].lower(),
             "password": request.json['password'],
             "image": "",
             "parentId": "",
@@ -89,7 +89,7 @@ class Parent:
             else:
                 return jsonify({"error":"Password is not correct" }), 401
         else:
-            return jsonify({"error":"Invalid login email" }), 402
+            return jsonify({"error":"Invalid login email", "email": request.json['email'].lower() }), 402
 
     def getParentByEmail(self, email):
         user = db.users.find_one({"email":email})
