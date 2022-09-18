@@ -1,3 +1,4 @@
+
 # SmartKids Project__Endpoint
 
 This Application for educating kids financial Knowledge from their yuong ages.

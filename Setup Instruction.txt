@@ -1,0 +1,23 @@
+Everytime starts to run the project:
+
+1. Create a local database named SmartKids.
+
+Set up and run the application with Windows:
+2. python -m venv venv
+3. pip install -r requirements.txt
+4. venv\Scripts\activate
+5. flask run
+
+
+Set up and run the application with Mac:
+2. python3 -m venv venv
+3. pip3 install -r requirements.txt
+4. source venv/bin/activate
+5. export FLASK_ENV=development
+6. export FLASK_APP=main.py
+5. flask run (if it doesn't work try: python3 -m flask run)
+
+During the setup process, if shows the error: "no module named 'flask' in vscode"
+you can run the below commands:
+1. python.exe -m pip install --upgrade pip
+2. pip install python-dotenv
