@@ -1,7 +1,7 @@
 
 # SmartKids Project__Endpoint
 
-This Application for educating kids financial Knowledge from their yuong ages.
+This Application is for educating kids on financial Knowledge from a young age.
 
 This applicaiton is suitable for the kids who aged from 4 to 12.
 
