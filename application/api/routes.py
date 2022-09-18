@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from application.models import Parent, Child
 from flask_jwt_extended import jwt_required
-
+from flask_cors import CORS, cross_origin
 
 api = Blueprint('api', __name__, url_prefix='/api/v1')
 
@@ -117,3 +117,13 @@ def getParent():
 
 
 
+#Update the parent information
+@api.route('/changeParent', methods=['POST'])
+@jwt_required()
+def changeParent():
+    email = request.args.get('email') 
+    print(email)
+    if email is None:
+        return jsonify({"error":"Please provide the user email" }), 410
+    else:
+        return Parent().updateParent(email)

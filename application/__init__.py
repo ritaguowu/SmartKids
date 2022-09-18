@@ -5,11 +5,12 @@ from flask_cors import CORS
 import datetime
 
 app = Flask(__name__)
-cors = CORS(app)
+CORS(app)
 
 #Config JWT token
 app.config['JWT_SECRET_KEY'] = '5ad5a0c7ba484ecd968ebe435b26a298'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(days=30)
+
 
 jwt = JWTManager(app)
 
